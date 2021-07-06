@@ -1,0 +1,20 @@
+{
+  "name": "@mikrav/reval",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "rescript",
+    "clean": "rescript clean -with-deps",
+    "start": "rescript build -w"
+  },
+  "keywords": [
+    "rescript"
+  ],
+  "author": "damaera",
+  "license": "MIT",
+  "dependencies": {
+    "rescript": "^9.1.4"
+  },
+  "devDependencies": {
+    "rescript-test": "^3.0.0"
+  }
+}
