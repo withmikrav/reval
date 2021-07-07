@@ -4,28 +4,23 @@ module String = SchemaString
 module Int = SchemaInt
 module Array = SchemaArray
 
-type rec errorItemT =
-  | InvalidType
-  | String(String.itemT)
-  | Int(Int.itemT)
-  | Float(float)
-  | Boolean(bool)
-  | Date(Js.Date.t)
-  | Array(Array.itemT) // child schema
-  | Dict(Js.Dict.t<errorItemT>)
-
 type rec t =
   | String(String.t)
   | Int(Int.t)
   | Float(float)
   | Boolean(bool)
   | Date(Js.Date.t)
-  | Array(Array.t, t) // child schema
+  //
+  | Option(option<t>)
+  | Array(Array.t, t) // array schema, child schema
   | Dict(Js.Dict.t<t>)
+  //
+  | And(array<t>)
+  | Or(array<t>)
 
 type errorT = {
   path: option<string>,
-  error: errorItemT,
+  error: Error.t,
 }
 
 let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, errorT> => {
@@ -87,6 +82,42 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         path: path,
         error: Array(errors),
       })
+    }
+  | (And(arrayOfSchema), input) => {
+      let errors =
+        arrayOfSchema
+        ->Js.Array2.map(schema => {
+          validate(schema, input)
+        })
+        ->Js.Array2.filter(result => {
+          switch result {
+          | Ok(_) => false
+          | Error(_) => true
+          }
+        })
+      switch errors {
+      | [] => Ok(input)
+      | errors => errors->Js.Array2.unsafe_get(0)
+      }
+    }
+  | (Or(arrayOfSchema), input) => {
+      let errors =
+        arrayOfSchema
+        ->Js.Array2.map(schema => {
+          validate(schema, input)
+        })
+        ->Js.Array2.filter(result => {
+          switch result {
+          | Ok(_) => false
+          | Error(_) => true
+          }
+        })
+      switch errors {
+      | [] => Ok(input)
+      | errors if errors->Js.Array2.length == arrayOfSchema->Js.Array2.length =>
+        errors->Js.Array2.unsafe_get(0)
+      | _ => Ok(input)
+      }
     }
 
   | _ =>

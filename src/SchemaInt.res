@@ -4,7 +4,7 @@ type itemT =
   | GTE(int)
   | LT(int)
   | LTE(int)
-  | Function(int, int => bool)
+  | Function(string, int => bool)
 
 type t = array<itemT>
 
