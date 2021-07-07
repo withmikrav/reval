@@ -29,6 +29,7 @@ let validate = (schema: t, rawInput: string) => {
     | MinLength(int) => input->String.length >= int == false
     | MaxLength(int) => input->String.length <= int == false
     | MatchRegex(re) => re->Js.Re.test_(input) == false
+    | Enum(values) => values->Js.Array2.some(value => value == input) == false
     | Function(_, fn) => fn(input) == false
     //
     | _ => false
