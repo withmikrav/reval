@@ -9,8 +9,6 @@ type itemT =
 type t = array<itemT>
 
 let validate = (schema: t, input: float) => {
-  let value = ref(input)
-
   let errorOpt = schema->Js.Array2.find(item => {
     switch item {
     | Equal(float) if input != float => true
@@ -24,7 +22,7 @@ let validate = (schema: t, input: float) => {
   })
 
   switch errorOpt {
-  | None => Ok(value.contents)
+  | None => Ok(input)
   | Some(error) => Error(error)
   }
 }

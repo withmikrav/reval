@@ -35,6 +35,16 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         error: Int(errors),
       })
     }
+  | (Float(schema), Float(input)) =>
+    let res = SchemaFloat.validate(schema, input)
+    switch res {
+    | Ok(value) => Ok(Float(value))
+    | Error(errors) =>
+      Error({
+        path: path,
+        error: Float(errors),
+      })
+    }
   | (Option(optionSchema, childSchema), Option(input)) => {
       let res = SchemaOption.validate(optionSchema, input)
       switch res {
