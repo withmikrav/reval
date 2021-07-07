@@ -4,7 +4,9 @@
   "scripts": {
     "build": "rescript",
     "clean": "rescript clean -with-deps",
-    "start": "rescript build -w"
+    "start": "rescript build -w",
+    "test": "retest",
+    "coverage": "c8 --include src npm run test"
   },
   "keywords": [
     "rescript"

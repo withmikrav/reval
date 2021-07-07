@@ -4,3 +4,4 @@
 .bsb.lock
 .merlin
 *.bs.js
+/coverage

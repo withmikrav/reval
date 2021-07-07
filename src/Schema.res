@@ -39,11 +39,17 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
       let res = SchemaOption.validate(optionSchema, input)
       switch res {
       | Ok(None) => Ok(Option(None))
-      | Ok(Some(value)) => childSchema->validate(value, ~path)
-      | Error(errors) =>
+      | Ok(Some(value)) => {
+          let res = childSchema->validate(value, ~path)
+          switch res {
+          | Ok(value) => Ok(Option(Some(value)))
+          | Error(err) => Error(err)
+          }
+        }
+      | Error(err) =>
         Error({
           path: path,
-          error: Option(errors),
+          error: Option(err),
         })
       }
     }

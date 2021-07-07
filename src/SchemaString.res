@@ -10,15 +10,17 @@ type itemT =
 
 type t = array<itemT>
 
-let validate = (schema: t, input: string) => {
-  let value = ref(input)
+let validate = (schema: t, rawInput: string) => {
+  let value = ref(rawInput)
 
   schema->Js.Array2.forEach(item => {
     switch item {
-    | Trimmed if input !== "" => value := value.contents->String.trim
+    | Trimmed if rawInput !== "" => value := value.contents->String.trim
     | _ => ()
     }
   })
+
+  let input = value.contents
 
   let errorOpt = schema->Js.Array2.find(item => {
     switch item {

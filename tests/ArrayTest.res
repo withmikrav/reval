@@ -13,7 +13,6 @@ Test.test("Reval.Array", () => {
       schema->validate(Array([String("hello")])),
       schema->validate(Array([Int(0), Int(2)])),
       schema->validate(String("")),
-      1,
     ),
     //
     (
@@ -35,7 +34,6 @@ Test.test("Reval.Array", () => {
         path: None,
         error: InvalidType,
       }),
-      1,
     ),
   )
 
@@ -44,28 +42,19 @@ Test.test("Reval.Array", () => {
   let schema = Schema.Array([MinLength(1)], childSchema)
 
   Assert.deepEqual(
-    (
-      //
-      schema->validate(
-        Array([
-          //
-          Array([String("hello2"), String("")]),
-          Array([String("sdfsd"), String("world2")]),
-        ]),
-      ),
-      // schema->validate(Array([String("hello"), String("")])),
-      1,
+    //
+    schema->validate(
+      Array([
+        //
+        Array([String("hello2"), String("")]),
+        Array([String("sdfsd"), String("world2")]),
+      ]),
     ),
     //
-    (
-      //
-      Error({
-        path: Some("0.1"),
-        error: String(NotEmpty),
-      }),
-      // Ok(Array([String("hello"), String("world")])),
-      1,
-    ),
+    Error({
+      path: Some("0.1"),
+      error: String(NotEmpty),
+    }),
     ~message="Nested",
   )
 })

@@ -57,4 +57,23 @@ Test.test("Reval.String", () => {
     ),
     ~message="MaxLength",
   )
+
+  let schemaMaxLength = Schema.String([MinLength(3), Trimmed])
+  Assert.deepEqual(
+    (
+      //
+      schemaMaxLength->validate(String("  hello   ")),
+      schemaMaxLength->validate(String("      ")),
+    ),
+    //
+    (
+      //
+      Ok(String("hello")),
+      Error({
+        path: None,
+        error: String(MinLength(3)),
+      }),
+    ),
+    ~message="Trimmed",
+  )
 })
