@@ -25,6 +25,16 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         error: String(errors),
       })
     }
+  | (Boolean(schema), Boolean(input)) =>
+    let res = SchemaBoolean.validate(schema, input)
+    switch res {
+    | Ok(value) => Ok(Boolean(value))
+    | Error(errors) =>
+      Error({
+        path: path,
+        error: Boolean(errors),
+      })
+    }
   | (Int(schema), Int(input)) =>
     let res = SchemaInt.validate(schema, input)
     switch res {

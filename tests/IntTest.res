@@ -8,6 +8,7 @@ Test.test("Reval.Int", () => {
       //
       schema->validate(Int(2)),
       schema->validate(Int(1)),
+      schema->validate(Float(1.)),
     ),
     //
     (
@@ -16,6 +17,10 @@ Test.test("Reval.Int", () => {
       Error({
         path: None,
         error: Int(Equal(2)),
+      }),
+      Error({
+        path: None,
+        error: InvalidType,
       }),
     ),
   )
