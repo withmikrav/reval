@@ -5,6 +5,7 @@ Test.test("Reval.Array", () => {
   let schema = Schema.Array([MinLength(2)], childSchema)
 
   Assert.deepEqual(
+    ~message="MinLength",
     (
       //
       schema->validate(Array([String("hello"), String("world")])),
@@ -36,7 +37,6 @@ Test.test("Reval.Array", () => {
       }),
       1,
     ),
-    ~message="MinLength",
   )
 
   let stringSchema = Schema.String([NotEmpty])
