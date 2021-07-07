@@ -1,22 +1,12 @@
-module Input = Input
-
-module String = SchemaString
-module Int = SchemaInt
-module Array = SchemaArray
-
 type rec t =
-  | String(String.t)
-  | Int(Int.t)
-  | Float(float)
-  | Boolean(bool)
-  | Date(Js.Date.t)
+  | String(SchemaString.t)
+  | Int(SchemaInt.t)
+  | Float(SchemaFloat.t)
+  | Boolean(SchemaBoolean.t)
   //
-  | Option(option<t>)
-  | Array(Array.t, t) // array schema, child schema
-  | Dict(Js.Dict.t<t>)
-  //
-  | And(array<t>)
-  | Or(array<t>)
+  | Option(SchemaOption.t, t)
+  | Array(SchemaArray.t, t) // array schema, child schema
+  | Dict(SchemaDict.t, array<(string, t)>) // dict schema, { key: schema }
 
 type errorT = {
   path: option<string>,
@@ -26,7 +16,7 @@ type errorT = {
 let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, errorT> => {
   switch (schema, input) {
   | (String(schema), String(input)) =>
-    let res = String.validate(schema, input)
+    let res = SchemaString.validate(schema, input)
     switch res {
     | Ok(value) => Ok(String(value))
     | Error(errors) =>
@@ -36,7 +26,7 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
       })
     }
   | (Int(schema), Int(input)) =>
-    let res = Int.validate(schema, input)
+    let res = SchemaInt.validate(schema, input)
     switch res {
     | Ok(value) => Ok(Int(value))
     | Error(errors) =>
@@ -45,11 +35,23 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         error: Int(errors),
       })
     }
+  | (Option(optionSchema, childSchema), Option(input)) => {
+      let res = SchemaOption.validate(optionSchema, input)
+      switch res {
+      | Ok(None) => Ok(Option(None))
+      | Ok(Some(value)) => childSchema->validate(value, ~path)
+      | Error(errors) =>
+        Error({
+          path: path,
+          error: Option(errors),
+        })
+      }
+    }
+
   | (Array(schema, childSchema), Array(input)) =>
-    let res = Array.validate(schema, input)
+    let res = SchemaArray.validate(schema, input)
     switch res {
     | Ok(values) => {
-        // Js.log(path->Belt.Option.getWithDefault("0"))
         let firstError =
           values
           ->Js.Array2.mapi((value, idx) => {
@@ -83,40 +85,44 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         error: Array(errors),
       })
     }
-  | (And(arrayOfSchema), input) => {
-      let errors =
-        arrayOfSchema
-        ->Js.Array2.map(schema => {
-          validate(schema, input)
-        })
-        ->Js.Array2.filter(result => {
-          switch result {
-          | Ok(_) => false
-          | Error(_) => true
+  | (Dict(dictSchema, dictChildSchema), Dict(input)) => {
+      let res = SchemaDict.validate(dictSchema, input)
+      switch res {
+      | Ok(values) => {
+          let inputDict = Js.Dict.fromArray(input)
+
+          let firstError =
+            dictChildSchema
+            ->Js.Array2.map(((key, keySchema)) => {
+              let value = inputDict->Js.Dict.unsafeGet(key)
+              let currPath = switch path {
+              | None => Some(key)
+              | Some(str) => Some(str ++ "." ++ key)
+              }
+              keySchema->validate(value, ~path=currPath)
+            })
+            ->Js.Array2.find(item => {
+              switch item {
+              | Error(_) => true
+              | Ok(_) => false
+              }
+            })
+
+          switch firstError {
+          | Some(Error(err)) =>
+            Error({
+              path: err.path,
+              error: err.error,
+            })
+          | _ => Ok(Dict(values))
           }
+        }
+
+      | Error(errors) =>
+        Error({
+          path: path,
+          error: Dict(errors),
         })
-      switch errors {
-      | [] => Ok(input)
-      | errors => errors->Js.Array2.unsafe_get(0)
-      }
-    }
-  | (Or(arrayOfSchema), input) => {
-      let errors =
-        arrayOfSchema
-        ->Js.Array2.map(schema => {
-          validate(schema, input)
-        })
-        ->Js.Array2.filter(result => {
-          switch result {
-          | Ok(_) => false
-          | Error(_) => true
-          }
-        })
-      switch errors {
-      | [] => Ok(input)
-      | errors if errors->Js.Array2.length == arrayOfSchema->Js.Array2.length =>
-        errors->Js.Array2.unsafe_get(0)
-      | _ => Ok(input)
       }
     }
 

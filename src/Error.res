@@ -5,5 +5,9 @@ type rec t =
   | Float(float)
   | Boolean(SchemaBoolean.itemT)
   | Date(Js.Date.t)
+  //
+  | Option(SchemaOption.itemT)
   | Array(SchemaArray.itemT) // child schema
-  | Dict(Js.Dict.t<t>)
+  | Dict(SchemaDict.itemT)
+
+//
