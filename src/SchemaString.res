@@ -9,9 +9,19 @@ type itemT =
   //
   | Transform(string => string)
 
+type errorT =
+  | NotEmpty
+  | Length(int)
+  | MinLength(int)
+  | MaxLength(int)
+  | MatchRegex(Js.Re.t)
+  | Enum(array<string>)
+  | Function(string)
+  | InvalidType
+
 type t = array<itemT>
 
-let validate = (schema: t, rawInput: string) => {
+let validate: (t, string) => result<string, errorT> = (schema, rawInput) => {
   let value = ref(rawInput)
 
   schema->Js.Array2.forEach(item => {
@@ -39,6 +49,16 @@ let validate = (schema: t, rawInput: string) => {
 
   switch errorOpt {
   | None => Ok(input)
-  | Some(error) => Error(error)
+  | Some(error) =>
+    switch error {
+    | NotEmpty => NotEmpty
+    | Length(int) => Length(int)
+    | MinLength(int) => MinLength(int)
+    | MaxLength(int) => MaxLength(int)
+    | MatchRegex(re) => MatchRegex(re)
+    | Enum(arr) => Enum(arr)
+    | Function(name, _) => Function(name)
+    | _ => InvalidType
+    }->Error
   }
 }

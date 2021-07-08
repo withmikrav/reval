@@ -20,7 +20,7 @@ Test.test("Reval.Int", () => {
       }),
       Error({
         path: None,
-        error: InvalidType,
+        error: Int(InvalidType),
       }),
     ),
   )
@@ -125,9 +125,27 @@ Test.test("Reval.Int", () => {
       Ok(Int(2)),
       Error({
         path: None,
-        error: Int(Function("isNotOne", int => int != 1)),
+        error: Int(Function("isNotOne")),
       }),
       Ok(Int(3)),
+    ),
+  )
+
+  let schema = Schema.Int([Transform(f => f + 1)])
+  Assert.deepEqual(
+    ~message="Transform",
+    (
+      //
+      schema->validate(Int(2)),
+      schema->validate(Int(1)),
+      schema->validate(Int(3)),
+    ),
+    //
+    (
+      //
+      Ok(Int(3)),
+      Ok(Int(2)),
+      Ok(Int(4)),
     ),
   )
 })

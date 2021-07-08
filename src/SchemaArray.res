@@ -6,6 +6,13 @@ type itemT =
   | Function(string, inputT => bool)
   | Transform(inputT => inputT)
 
+type errorT =
+  | Length(int)
+  | MinLength(int)
+  | MaxLength(int)
+  | Function(string)
+  | InvalidType
+
 type t = array<itemT>
 
 let validate = (schema: t, rawInput: inputT) => {
@@ -32,6 +39,13 @@ let validate = (schema: t, rawInput: inputT) => {
 
   switch errorOpt {
   | None => Ok(input)
-  | Some(error) => Error(error)
+  | Some(error) =>
+    switch error {
+    | Length(int) => Length(int)
+    | MinLength(int) => MinLength(int)
+    | MaxLength(int) => MaxLength(int)
+    | Function(name, _) => Function(name)
+    | _ => InvalidType
+    }->Error
   }
 }

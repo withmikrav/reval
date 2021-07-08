@@ -6,6 +6,7 @@ type itemT =
   //
   | Transform(inputT => inputT)
 
+type errorT = RequiredKeys(array<string>) | Function(string) | InvalidType
 type t = array<itemT>
 
 let validate = (schema: t, rawInput: inputT) => {
@@ -38,7 +39,7 @@ let validate = (schema: t, rawInput: inputT) => {
         if fn(input) {
           None
         } else {
-          Some(Function(name, fn))
+          Some(Function(name))
         }
       | _ => None
       }

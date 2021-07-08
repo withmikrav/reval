@@ -23,7 +23,7 @@ Test.test("Reval.Dict", () => {
       }),
       Error({
         path: None,
-        error: InvalidType,
+        error: Dict(InvalidType),
       }),
     ),
   )
@@ -39,8 +39,36 @@ Test.test("Reval.Dict", () => {
       Ok(Dict([("name", String("hello"))])),
       Error({
         path: None,
-        error: Dict(Function("isLengthNot2", arr => arr->Js.Array2.length != 2)),
+        error: Dict(Function("isLengthNot2")),
       }),
+    ),
+  )
+
+  let schema = Schema.Dict(
+    [
+      Transform(
+        d =>
+          d->Js.Array2.filter(((k, _v)) => {
+            k->Js.String2.startsWith("a")
+          }),
+      ),
+    ],
+    [],
+  )
+  Assert.deepEqual(
+    ~message="Transform",
+    (
+      //
+      schema->validate(
+        Dict([("abc", String("abc")), ("aa", String("aa")), ("bca", String("bcs"))]),
+      ),
+      schema->validate(Dict([("test", String("test"))])),
+    ),
+    //
+    (
+      //
+      Ok(Dict([("abc", String("abc")), ("aa", String("aa"))])),
+      Ok(Dict([])),
     ),
   )
 })

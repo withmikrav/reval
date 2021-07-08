@@ -2,7 +2,7 @@ type rec t =
   | String(string)
   | Int(int)
   | Float(float)
-  | Boolean(bool)
+  | Bool(bool)
   //
   | Option(option<t>)
   | Array(array<t>)

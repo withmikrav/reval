@@ -1,13 +1,22 @@
 type inputT = int
 type itemT =
-  | Equal(int)
-  | GT(int)
-  | GTE(int)
-  | LT(int)
-  | LTE(int)
-  | Function(string, int => bool)
+  | Equal(inputT)
+  | GT(inputT)
+  | GTE(inputT)
+  | LT(inputT)
+  | LTE(inputT)
+  | Function(string, inputT => bool)
   //
   | Transform(inputT => inputT)
+
+type errorT =
+  | Equal(inputT)
+  | GT(inputT)
+  | GTE(inputT)
+  | LT(inputT)
+  | LTE(inputT)
+  | Function(string)
+  | InvalidType
 
 type t = array<itemT>
 
@@ -37,6 +46,15 @@ let validate = (schema: t, rawInput: int) => {
 
   switch errorOpt {
   | None => Ok(input)
-  | Some(error) => Error(error)
+  | Some(error) =>
+    switch error {
+    | Equal(int) => Equal(int)
+    | GT(int) => GT(int)
+    | GTE(int) => GTE(int)
+    | LT(int) => LT(int)
+    | LTE(int) => LTE(int)
+    | Function(name, _) => Function(name)
+    | _ => InvalidType
+    }->Error
   }
 }

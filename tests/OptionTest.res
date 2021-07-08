@@ -21,7 +21,7 @@ Test.test("Option", () => {
       }),
       Error({
         path: None,
-        error: InvalidType,
+        error: Option(InvalidType),
       }),
     ),
     ~message="IsSome",
@@ -42,7 +42,7 @@ Test.test("Option", () => {
       Ok(Option(None)),
       Error({
         path: None,
-        error: InvalidType,
+        error: Option(InvalidType),
       }),
     ),
     ~message="IsNone",
@@ -58,9 +58,27 @@ Test.test("Option", () => {
       Ok(Option(Some(String("Hello")))),
       Error({
         path: None,
-        error: Option(Function("isNotNone", i => i != None)),
+        error: Option(Function("isNotNone")),
       }),
     ),
     ~message="Function",
+  )
+
+  let schema = Schema.Option([Transform(_ => None)], Schema.String([]))
+  Assert.deepEqual(
+    ~message="Transform",
+    (
+      //
+      schema->validate(Option(Some(String("sdf")))),
+      schema->validate(Option(Some(String("test")))),
+      schema->validate(Option(None)),
+    ),
+    //
+    (
+      //
+      Ok(Option(None)),
+      Ok(Option(None)),
+      Ok(Option(None)),
+    ),
   )
 })

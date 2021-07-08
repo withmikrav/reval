@@ -20,7 +20,7 @@ Test.test("Reval.Float", () => {
       }),
       Error({
         path: None,
-        error: InvalidType,
+        error: Float(InvalidType),
       }),
     ),
   )
@@ -125,9 +125,27 @@ Test.test("Reval.Float", () => {
       Ok(Float(2.)),
       Error({
         path: None,
-        error: Float(Function("isNotOne", f => f != 1.)),
+        error: Float(Function("isNotOne")),
       }),
       Ok(Float(3.)),
+    ),
+  )
+
+  let schema = Schema.Float([Transform(f => f +. 1.)])
+  Assert.deepEqual(
+    ~message="Transform",
+    (
+      //
+      schema->validate(Float(2.)),
+      schema->validate(Float(1.)),
+      schema->validate(Float(3.)),
+    ),
+    //
+    (
+      //
+      Ok(Float(3.)),
+      Ok(Float(2.)),
+      Ok(Float(4.)),
     ),
   )
 })

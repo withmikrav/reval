@@ -1,13 +1,10 @@
 type rec t =
-  | InvalidType
-  | String(SchemaString.itemT)
-  | Int(SchemaInt.itemT)
-  | Float(SchemaFloat.itemT)
-  | Boolean(SchemaBoolean.itemT)
-  | Date(Js.Date.t)
   //
-  | Option(SchemaOption.itemT)
-  | Array(SchemaArray.itemT) // child schema
-  | Dict(SchemaDict.itemT)
-
-//
+  | String(SchemaString.errorT)
+  | Int(SchemaInt.errorT)
+  | Float(SchemaFloat.errorT)
+  | Bool(SchemaBool.errorT)
+  //
+  | Option(SchemaOption.errorT)
+  | Array(SchemaArray.errorT)
+  | Dict(SchemaDict.errorT)

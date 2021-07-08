@@ -2,7 +2,7 @@ type rec t =
   | String(SchemaString.t)
   | Int(SchemaInt.t)
   | Float(SchemaFloat.t)
-  | Boolean(SchemaBoolean.t)
+  | Bool(SchemaBool.t)
   //
   | Option(SchemaOption.t, t)
   | Array(SchemaArray.t, t) // array schema, child schema
@@ -25,16 +25,18 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         error: String(errors),
       })
     }
-  | (Boolean(schema), Boolean(input)) =>
-    let res = SchemaBoolean.validate(schema, input)
+  | (String(_), _) => Error({path: path, error: String(InvalidType)})
+  | (Bool(schema), Bool(input)) =>
+    let res = SchemaBool.validate(schema, input)
     switch res {
-    | Ok(value) => Ok(Boolean(value))
+    | Ok(value) => Ok(Bool(value))
     | Error(errors) =>
       Error({
         path: path,
-        error: Boolean(errors),
+        error: Bool(errors),
       })
     }
+  | (Bool(_), _) => Error({path: path, error: Bool(InvalidType)})
   | (Int(schema), Int(input)) =>
     let res = SchemaInt.validate(schema, input)
     switch res {
@@ -45,6 +47,7 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         error: Int(errors),
       })
     }
+  | (Int(_), _) => Error({path: path, error: Int(InvalidType)})
   | (Float(schema), Float(input)) =>
     let res = SchemaFloat.validate(schema, input)
     switch res {
@@ -55,6 +58,7 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         error: Float(errors),
       })
     }
+  | (Float(_), _) => Error({path: path, error: Float(InvalidType)})
   | (Option(optionSchema, childSchema), Option(input)) => {
       let res = SchemaOption.validate(optionSchema, input)
       switch res {
@@ -73,7 +77,7 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         })
       }
     }
-
+  | (Option(_), _) => Error({path: path, error: Option(InvalidType)})
   | (Array(schema, childSchema), Array(input)) =>
     let res = SchemaArray.validate(schema, input)
     switch res {
@@ -112,6 +116,7 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         error: Array(errors),
       })
     }
+  | (Array(_), _) => Error({path: path, error: Array(InvalidType)})
   | (Dict(dictSchema, dictChildSchema), Dict(input)) => {
       let res = SchemaDict.validate(dictSchema, input)
       switch res {
@@ -153,13 +158,6 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
         })
       }
     }
-
-  | _ =>
-    Error({
-      {
-        path: path,
-        error: InvalidType,
-      }
-    })
+  | (Dict(_), _) => Error({path: path, error: Dict(InvalidType)})
   }
 }

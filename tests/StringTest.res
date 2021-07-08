@@ -155,7 +155,7 @@ Test.test("Reval.String", () => {
       Ok(String("Not test")),
       Error({
         path: None,
-        error: String(Function("isNotTest", str => str != "Test")),
+        error: String(Function("isNotTest")),
       }),
     ),
   )

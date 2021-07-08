@@ -28,11 +28,11 @@ Test.test("Reval.Array", () => {
       }),
       Error({
         path: Some("0"),
-        error: InvalidType,
+        error: String(InvalidType),
       }),
       Error({
         path: None,
-        error: InvalidType,
+        error: Array(InvalidType),
       }),
     ),
   )
@@ -95,10 +95,30 @@ Test.test("Reval.Array", () => {
       //
       Error({
         path: None,
-        error: Array(Function("lengthIsNot2", arr => arr->Js.Array2.length != 2)),
+        error: Array(Function("lengthIsNot2")),
       }),
       Ok(Array([String("hello")])),
       Ok(Array([String(""), String(""), String("")])),
+    ),
+  )
+
+  let childSchema = Schema.String([MinLength(2)])
+  let schema = Schema.Array(
+    [Transform(arr => arr->Js.Array2.filter(item => item == String("hello")))],
+    childSchema,
+  )
+  Assert.deepEqual(
+    ~message="Transform",
+    (
+      //
+      schema->validate(Array([String("hello"), String("world")])),
+      schema->validate(Array([String("hello"), String(""), String("")])),
+    ),
+    //
+    (
+      //
+      Ok(Array([String("hello")])),
+      Ok(Array([String("hello")])),
     ),
   )
 
@@ -108,6 +128,7 @@ Test.test("Reval.Array", () => {
 
   Assert.deepEqual(
     //
+    ~message="Nested",
     schema->validate(
       Array([
         //
@@ -120,6 +141,5 @@ Test.test("Reval.Array", () => {
       path: Some("0.1"),
       error: String(NotEmpty),
     }),
-    ~message="Nested",
   )
 })

@@ -1,4 +1,4 @@
-include BooleanTest
+include BoolTest
 include StringTest
 include IntTest
 include FloatTest
