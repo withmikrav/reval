@@ -4,6 +4,7 @@ type itemT =
   | RequiredKeys(array<string>)
   | Function(string, inputT => bool)
   //
+  | StripUnknown
   | Transform(inputT => inputT)
 
 type errorT = RequiredKeys(array<string>) | Function(string) | InvalidType
@@ -15,6 +16,29 @@ let validate = (schema: t, rawInput: inputT) => {
   schema->Js.Array2.forEach(item => {
     switch item {
     | Transform(fn) => value := value.contents->fn
+    | StripUnknown => {
+        let requiredKeysOpt = schema->Js.Array2.find(item =>
+          switch item {
+          | RequiredKeys(_) => true
+          | _ => false
+          }
+        )
+
+        let dict = Js.Dict.fromArray(value.contents)
+        let newDict = Js.Dict.empty()
+
+        let requiredKeys = switch requiredKeysOpt {
+        | Some(RequiredKeys(arr)) => arr
+        | _ => []
+        }
+
+        requiredKeys->Js.Array2.forEach(key => {
+          newDict->Js.Dict.set(key, dict->Js.Dict.unsafeGet(key))
+        })
+
+        value := newDict->Js.Dict.entries
+      }
+
     | _ => ()
     }
   })

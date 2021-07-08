@@ -71,4 +71,33 @@ Test.test("Reval.Dict", () => {
       Ok(Dict([])),
     ),
   )
+
+  Assert.deepEqual(
+    ~message="Complex",
+    Schema.Dict(
+      [RequiredKeys(["name", "age"])],
+      [
+        //
+        ("name", Schema.String([MinLength(2)])),
+        ("age", Schema.Int([GTE(0)])),
+        ("website", Schema.String([NotEmpty])),
+      ],
+    )->validate(
+      //
+      Dict([
+        //
+        ("name", String("Moona")),
+        ("age", Int(3)),
+        ("website", String("https://example.com")),
+      ]),
+    ),
+    Ok(
+      Dict([
+        //
+        ("name", String("Moona")),
+        ("age", Int(3)),
+        ("website", String("https://example.com")),
+      ]),
+    ),
+  )
 })
