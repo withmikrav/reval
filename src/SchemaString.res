@@ -6,7 +6,8 @@ type itemT =
   | MatchRegex(Js.Re.t)
   | Enum(array<string>)
   | Function(string, string => bool)
-  | Trimmed
+  //
+  | Transform(string => string)
 
 type t = array<itemT>
 
@@ -15,7 +16,7 @@ let validate = (schema: t, rawInput: string) => {
 
   schema->Js.Array2.forEach(item => {
     switch item {
-    | Trimmed if rawInput !== "" => value := value.contents->String.trim
+    | Transform(fn) => value := value.contents->fn
     | _ => ()
     }
   })
@@ -37,7 +38,7 @@ let validate = (schema: t, rawInput: string) => {
   })
 
   switch errorOpt {
-  | None => Ok(value.contents)
+  | None => Ok(input)
   | Some(error) => Error(error)
   }
 }

@@ -79,7 +79,7 @@ Test.test("Reval.Array", () => {
 
   let childSchema = Schema.String([])
   let schema = Schema.Array(
-    [Function("lengthIsNot1", arr => arr->Js.Array2.length != 1)],
+    [Function("lengthIsNot2", arr => arr->Js.Array2.length != 2)],
     childSchema,
   )
   Assert.deepEqual(
@@ -93,15 +93,12 @@ Test.test("Reval.Array", () => {
     //
     (
       //
-      Ok(Array([String("hello"), String("world")])),
       Error({
         path: None,
-        error: Array(Function("lengthIsNot1", arr => arr->Js.Array2.length != 1)),
+        error: Array(Function("lengthIsNot2", arr => arr->Js.Array2.length != 2)),
       }),
-      Error({
-        path: None,
-        error: Array(Function("lengthIsNot1", arr => arr->Js.Array2.length != 1)),
-      }),
+      Ok(Array([String("hello")])),
+      Ok(Array([String(""), String(""), String("")])),
     ),
   )
 

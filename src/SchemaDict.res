@@ -1,12 +1,25 @@
+type inputT = array<(string, Input.t)>
+
 type itemT =
   | RequiredKeys(array<string>)
-  | Function(string, array<(string, Input.t)> => bool)
+  | Function(string, inputT => bool)
+  //
+  | Transform(inputT => inputT)
 
 type t = array<itemT>
 
-let toJsDict = input => Js.Dict.fromArray(input)
+let validate = (schema: t, rawInput: inputT) => {
+  let value = ref(rawInput)
 
-let validate = (schema: t, input: array<(string, Input.t)>) => {
+  schema->Js.Array2.forEach(item => {
+    switch item {
+    | Transform(fn) => value := value.contents->fn
+    | _ => ()
+    }
+  })
+
+  let input = value.contents
+
   let dict = Js.Dict.fromArray(input)
 
   let firstError =
@@ -27,6 +40,7 @@ let validate = (schema: t, input: array<(string, Input.t)>) => {
         } else {
           Some(Function(name, fn))
         }
+      | _ => None
       }
     })
     ->Js.Array2.find(opt => opt->Js.Option.isSome)

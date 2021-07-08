@@ -82,9 +82,9 @@ Test.test("Reval.String", () => {
     ),
   )
 
-  let schema = Schema.String([MinLength(3), Trimmed])
+  let schema = Schema.String([MinLength(3), Transform(str => str->Js.String2.trim)])
   Assert.deepEqual(
-    ~message="Trimmed",
+    ~message="Transform",
     (
       //
       schema->validate(String("  hello   ")),

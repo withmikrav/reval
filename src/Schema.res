@@ -101,7 +101,8 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
             path: err.path,
             error: err.error,
           })
-        | _ => Ok(Array(values))
+        | Some(Ok(values)) => Ok(values)
+        | None => Ok(Array(values))
         }
       }
 
@@ -140,7 +141,8 @@ let rec validate = (~path=None, schema: t, input: Input.t): result<Input.t, erro
               path: err.path,
               error: err.error,
             })
-          | _ => Ok(Dict(values))
+          | Some(Ok(values)) => Ok(values)
+          | None => Ok(Dict(values))
           }
         }
 

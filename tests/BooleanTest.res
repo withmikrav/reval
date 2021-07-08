@@ -41,7 +41,7 @@ Test.test("Reval.Boolean", () => {
         path: None,
         error: Boolean(IsFalse),
       }),
-      Ok(Boolean(true)),
+      Ok(Boolean(false)),
       Error({
         path: None,
         error: InvalidType,

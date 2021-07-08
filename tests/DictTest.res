@@ -9,6 +9,7 @@ Test.test("Reval.Dict", () => {
       schema->validate(Dict([("name", String("hello"))])),
       schema->validate(Dict([("email", String("hello"))])),
       schema->validate(Dict([("name", String(""))])),
+      schema->validate(Array([])),
     ),
     (
       Ok(Dict([("name", String("hello"))])),
@@ -19,6 +20,10 @@ Test.test("Reval.Dict", () => {
       Error({
         path: Some("name"),
         error: String(MinLength(2)),
+      }),
+      Error({
+        path: None,
+        error: InvalidType,
       }),
     ),
   )
